@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="accounts-sfdc-sapi-main">
+        <http:listener path="${https.path}" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="accounts-sfdc-sapi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="accounts-sfdc-sapi-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accounts-sfdc-sapi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="put:\accounts\(account_id):application\json:accounts-sfdc-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="account_id">attributes.uriParams.'account_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="cadce255-1a52-41da-958f-7f62b7ed7bd9" name="flow-to-upsert-id"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="delete:\accounts\(account_id):accounts-sfdc-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="account_id">attributes.uriParams.'account_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="d3038fe4-14b0-4aa3-9b8e-3aa5358bb0c3" name="flow-delete-id"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="get:\accounts\(account_id):accounts-sfdc-sapi-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="account_id">attributes.uriParams.'account_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="fdf977d9-6c8b-4a5e-acde-a0e87732190d" name="flow-get-id"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="post:\accounts:application\json:accounts-sfdc-sapi-config">
+        <logger level="INFO" doc:name="Logger" doc:id="81c81f1a-eabb-4c4a-a847-4a03277b0ded" />
+		<flow-ref doc:name="Flow Reference" doc:id="23cf716e-acdd-4585-b6c2-73803488e37b" name="flow-newAccount"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+</mule>

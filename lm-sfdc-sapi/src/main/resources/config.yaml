@@ -1,0 +1,20 @@
+https:
+  host: "0.0.0.0"
+  port: "8082"
+  timeout: "30000"
+  path: "/api/*"
+  
+keystore:
+  keyPassword: "![lNzQndTAmyquEyXfnL3Aqw==]"
+  Password: "![lNzQndTAmyquEyXfnL3Aqw==]"
+  path: "keystore.jks"
+  type: JKS
+  
+salesforce-config: 
+  username: "cibi.sivakumar-afjw@force.com"
+  password: "![lNzQndTAmyquEyXfnL3Aqw==]"
+  sec-token: "![p9zLLd74lG6RMJPMRzvGuSLXd13BdKNUD19TOBqhwQ0=]"
+  url: "https://login.salesforce.com/services/Soap/u/56.0"
+
+ 
+

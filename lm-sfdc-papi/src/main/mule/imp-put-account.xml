@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="flow-update-account" doc:id="b9ff74f3-8baa-44d1-b590-187a6292c996" >
+		<logger level="INFO" doc:name="Logger" doc:id="122c8031-3f3f-455f-8068-44a6443cd0d3" />
+		<ee:transform doc:name="Transform Message to store the account-id" doc:id="5a2377a7-fa48-42cc-97ab-f34eac570aac" >
+			<ee:variables >
+				<ee:set-variable variableName="account_id" ><![CDATA[attributes.uriParams.'account_id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[upper(payload.billingAddress.countryIso)]" doc:name="Set Variable to change the ISO to upper case" doc:id="fccbcba7-df6b-4596-b771-c2130c4e9c8a" variableName="iso" />
+		<http:request method="${request-config.get-method}" doc:name="Request to get the country" doc:id="bd0e74e1-af94-4bdd-9ac2-5ae5bd8369a1" sendCorrelationId="ALWAYS" target="country" config-ref="HTTP_Request_configuration-country" path="${request-config.get-path}">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"correlationId" : "Good",
+	"client_secret" : "aAB82B8180B04E3391b503AA66844654",
+	"client_id" : "278c2c024ce94151884f31b544fb242b"
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"iso_code" : vars.iso
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message1" doc:id="48526601-5f5c-4dba-97b9-a476a40fb8cb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "name": payload.name,
+  "email": payload.email,
+  "billingAddress": {
+    "city": payload.billingAddress.city,
+    "country": vars.country.Country,
+    "state": payload.billingAddress.state,
+    "street": payload.billingAddress.street,
+    "postalCode": payload.billingAddress.postalCode
+  },
+  "shippingAddress": {
+    "city": payload.shippingAddress.city,
+    "country": vars.country.Country,
+    "state": payload.shippingAddress.state,
+    "street": payload.shippingAddress.street
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="${request-config.put-method}" doc:name="Request to the sfdc account to update the account" doc:id="b9236d2d-f7d4-461d-92db-f628ff0a68a5" sendCorrelationId="ALWAYS" path="${request-config.put-path}" config-ref="HTTP_Request_configuration-sfdc">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : "good",
+	"client_secret" : "aAB82B8180B04E3391b503AA66844654",
+	"client_id" : "278c2c024ce94151884f31b544fb242b"
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"account_id" : vars.account_id
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Payload" doc:id="f246886b-d97e-43c4-b576-59f11914fe67" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,31 @@
+https:
+  host: "0.0.0.0"
+  port: "8082"
+  timeout: "30000"
+  path: "/api/*"
+  
+request-config:
+  get-method: "GET"
+  put-method: "PUT"
+  post-method: "POST"
+  host-sfdc: "lm-sfdc-sapi.us-e2.cloudhub.io" 
+  host-country: "lm-sfdc-country-sapi.us-e2.cloudhub.io"
+  port: "443"
+  post-path: "/api/accounts"
+  put-path: "/api/accounts/{account_id}"
+  get-path: "/api/countries/{iso_code}"
+  
+
+
+Truststore:
+  path: "Truststore.jks"
+  password: "![lNzQndTAmyquEyXfnL3Aqw==]" 
+  type: JKS
+
+keystore:
+  keyPassword: "![lNzQndTAmyquEyXfnL3Aqw==]"
+  Password: "![lNzQndTAmyquEyXfnL3Aqw==]"
+  path: "keystore.jks"
+  type: JKS
+ 
+

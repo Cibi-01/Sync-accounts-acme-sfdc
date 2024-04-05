@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="flow-get-id" doc:id="a825e89e-1bfe-45d1-9fcd-0771bcd862c2" >
+		<logger level="INFO" doc:name="Logger to verify the flow" doc:id="d9ef2c77-3098-478b-af8f-08fc7e9b7451" />
+		<ee:transform doc:name="Transform Message to store the account-id" doc:id="f7e08b17-ebd0-4b9f-a2a3-a65fbd9b6507" >
+			<ee:variables >
+				<ee:set-variable variableName="account_id" ><![CDATA[attributes.uriParams.'account_id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query to retreive the account" doc:id="a291e0b6-bd5f-4fbd-a5e2-fe2747d18746" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[select Id, Name, BillingStreet, BillingCity, BillingState, BillingCountry from Account where Id = ':account_id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"account_id" : vars.account_id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Payload" doc:id="d0f7a595-d0af-428b-be37-8a305d3ea7b7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

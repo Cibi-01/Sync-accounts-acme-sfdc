@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	    <http:listener-config name="accounts-papi-httpListenerConfig">
+        <http:listener-connection host="${https.host}" port="${https.port}" readTimeout="${https.timeout}" protocol="HTTPS" tlsContext="TLS_Context-keystore"/>
+    </http:listener-config>
+    <apikit:config name="accounts-papi-config" api="resource::cff1be64-f91a-4e2c-8ad4-24808f2c43c0:lm-sfdc-account-papi:1.0.1:raml:zip:accounts-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<api-gateway:autodiscovery apiId="19389589" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="49a2bf45-e153-40db-bdce-f5607cd27f5e" flowRef="accounts-papi-main" />
+	<import doc:name="Import" doc:id="307a123b-1075-4a45-ae29-f57a07dd6e1b" file="lm-common-error-handler.xml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="bfdbd929-3da7-4099-98ba-a719ea03fa42" file="config.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="8cb362c6-e10c-4416-bd06-d4d19f83d07c" file="config.yaml" key="TrainingMule@123" />
+	<tls:context name="TLS_Context-Truststore" doc:name="TLS Context" doc:id="e0a7d2ae-ad4e-4379-95e9-2f46c35c917d" >
+		<tls:trust-store path="${Truststore.path}" password="${secure::Truststore.password}" type="${Truststore.type}" insecure="true" />
+	</tls:context>
+	<tls:context name="TLS_Context-keystore" doc:name="TLS Context" doc:id="927f7f15-74c0-42ea-87a7-9473009dfcf5" >
+		<tls:key-store type="${keystore.type}" path="${keystore.path}" keyPassword="${secure::keystore.keyPassword}" password="${secure::keystore.Password}"/>
+	</tls:context>
+	<http:request-config name="HTTP_Request_configuration-country" doc:name="HTTP Request configuration" doc:id="ae7ff2c1-8986-4c8b-843f-15d1d4ae7fb8" >
+		<http:request-connection protocol="HTTPS" tlsContext="TLS_Context-Truststore" port="${request-config.port}" host="${request-config.host-country}"/>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration-sfdc" doc:name="HTTP Request configuration" doc:id="a9f975d2-bc8c-4580-90b7-6f924b58f7ff" >
+		<http:request-connection host="${request-config.host-sfdc}" port="${request-config.port}" protocol="HTTPS" tlsContext="TLS_Context-Truststore"/>
+	</http:request-config>
+	
+	
+</mule>

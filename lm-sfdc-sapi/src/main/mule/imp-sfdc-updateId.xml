@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="flow-to-upsert-id" doc:id="b0550f0d-bf26-4adf-a29c-ad769f2bb71c" >
+		<logger level="INFO" doc:name="Logger" doc:id="9e175b2e-0e7e-4e40-8f7c-c3ac8d273f4f" />
+		<ee:transform doc:name="Transform Message" doc:id="5272b0de-96ac-4740-8f0f-23e31a38ce76" >
+			<ee:variables >
+				<ee:set-variable variableName="account_id" ><![CDATA[attributes.uriParams.'account_id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<!-- [STUDIO:"Set Variable"]<set-variable value="#[payload&#93;" doc:name="Set Variable" doc:id="f76c5b50-8e83-4440-9382-9d6a018fa0f1" variableName="payload" /> [STUDIO] -->
+		<salesforce:query doc:name="Query" doc:id="0d3ca62f-7544-4dbc-9a98-9d10d08f743c" config-ref="Salesforce_Config" target="success">
+			<salesforce:salesforce-query ><![CDATA[select Name from Account where Id = ':accountId']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"accountId" : vars.account_id
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message1" doc:id="b0533228-5df2-4bf7-9ead-884083b18dda" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Id: vars.account_id,
+	Name: payload.name,
+	Email__c: payload.email,
+	BillingStreet: payload.billingAddress.street,
+	BillingCity: payload.billingAddress.city,
+	BillingState: payload.billingAddress.state,
+	BillingPostalCode: payload.billingAddress.postalCode,
+	BillingCountry: payload.billingAddress.country,
+	ShippingStreet: payload.shippingAddress.street,
+	ShippingCity: payload.shippingAddress.city,
+	ShippingState: payload.shippingAddress.state,
+	ShippingCountry: payload.shippingAddress.country
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert objectType="Account" externalIdFieldName="Id" doc:name="Upsert" doc:id="efc6daac-985f-4e31-9dec-1cb1d8739958" config-ref="Salesforce_Config" target="success" />
+		<!-- [STUDIO:"Choice"]<choice doc:name="Choice" doc:id="284b2560-053c-4448-ba52-eea0b59c7b34" >
+			<when expression="#[vars.success.successful != true&#93;" >
+				<ee:transform doc:name="Transform Message" doc:id="cdd1541b-6b3a-4b80-b855-f356e57b1a5d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+&#45;&#45;-
+[{
+	AccountId__c: vars.account_id,
+	Email__c: vars.payload.email,
+	Name: vars.payload.name,
+	BillingStreet: vars.payload.billingAddress.street,
+	BillingCity: vars.payload.billingAddress.city,
+	BillingState: vars.payload.billingAddress.state,
+	BillingPostalCode: vars.payload.billingAddress.postalCode,
+	BillingCountry: vars.payload.billingAddress.country,
+	ShippingStreet: vars.payload.shippingAddress.street,
+	ShippingCity: vars.payload.shippingAddress.city,
+	ShippingState: vars.payload.shippingAddress.state,
+	ShippingPostalCode: vars.payload.shippingAddress.postalCode,
+	ShippingCountry: vars.payload.shippingAddress.country
+}&#93;&#93;&#93;></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:upsert objectType="Account" externalIdFieldName="Id" doc:name="Upsert" doc:id="d49afd50-0389-45d6-834a-775d8a54dc9f" config-ref="Salesforce_Config" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="70aa3373-e7c5-4054-94ea-16cd692888be" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice> [STUDIO] -->
+		<ee:transform doc:name="Transform Message2" doc:id="c421f7b6-c3b5-41ad-be14-6d976687707c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

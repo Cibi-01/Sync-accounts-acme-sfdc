@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="flow-get-country" doc:id="2b82e5c5-0361-43d4-8290-664b19d749c8" >
+		<logger level="INFO" doc:name="Logger to verify the get flow" doc:id="aa583e8d-6e27-4519-b4cb-5d6cf66b0e26" />
+		<set-variable value="#[attributes.uriParams.iso_code]" doc:name="Set Variable to fetch the Iso from URI params" doc:id="786b6426-8079-40e2-a19f-d3d0c080a63c" variableName="iso" />
+		<http:request doc:name="Request to country list API" doc:id="19c0fce3-e09f-48c0-bb7a-0a8ded3139ed" url="${request-config.url}" sendCorrelationId="ALWAYS" method="${request-config.method}"/>
+		<ee:transform doc:name="Transform Message to filter the ISO matching country" doc:id="0ae47a5f-aece-470f-b996-e95faf3dafb6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data filterObject ((value, key) -> (key) startsWith  vars.iso) mapObject ((v, k, i) -> {
+        "Country":v.country,
+        "Region": v.region,
+        "ISO_Code": vars.iso
+    } )]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+	</flow>
+</mule>

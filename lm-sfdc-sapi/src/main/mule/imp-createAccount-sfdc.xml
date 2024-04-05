@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="flow-newAccount" doc:id="4b0b30c1-cc2d-4ba1-a7b6-ad8d79255b95" >
+		<logger level="INFO" doc:name="Logger to verify the flow" doc:id="52f7bc0f-489f-4ef6-9fd5-29a09f0fa8d6" />
+		<ee:transform doc:name="Transform Message to map the fields" doc:id="c280d0d4-2d6a-42d6-b343-35fe000580df" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	Email__c: payload.email,
+	BillingStreet: payload.billingAddress.street,
+	BillingCity: payload.billingAddress.city,
+	BillingState: payload.billingAddress.state,
+	BillingPostalCode: payload.billingAddress.postalCode,
+	BillingCountry: payload.billingAddress.country,
+	ShippingStreet: payload.shippingAddress.street,
+	ShippingCity: payload.shippingAddress.city,
+	ShippingState: payload.shippingAddress.state,
+	ShippingCountry: payload.shippingAddress.country,
+
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Account" doc:name="Create a new Account in Salesforce" doc:id="b6d33454-8717-4f9d-b5dd-0cffd9897f78" config-ref="Salesforce_Config" />
+		<set-variable value="#[payload.items.id]" doc:name="store the new Id created" doc:id="25bc61f0-86d3-48c5-9f96-478ae36cab06" variableName="newId"/>
+		<ee:transform doc:name="Transform Message to map the ID created" doc:id="d44b6970-bcaf-4920-a841-bf5aa9128070" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"ID Created": vars.newId
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

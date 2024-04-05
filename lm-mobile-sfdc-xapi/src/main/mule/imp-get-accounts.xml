@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="imp-get-accountsFlow" doc:id="7bfb3e2b-44d9-47ed-8a13-783b73aa8f04" >
+		<logger level="INFO" doc:name="Logger to verify the request" doc:id="c47f5ee9-8028-424a-9521-646d4d7a4199" />
+		<http:request method="${request-config.get-method}" doc:name="Request to get accounts from sfdc sapi" doc:id="3f9f73ed-bee0-4176-9ae0-e83719b36927" config-ref="HTTP_Request_configuration-sfdc-sapi" path="${request-config.get-path}" sendCorrelationId="ALWAYS">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : "good",
+	"client_secret" : "aAB82B8180B04E3391b503AA66844654",
+	"client_id" : "278c2c024ce94151884f31b544fb242b"
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"account_id" : vars.account_id
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+</mule>

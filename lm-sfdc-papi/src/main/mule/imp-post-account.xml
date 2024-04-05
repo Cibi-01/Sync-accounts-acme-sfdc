@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="flow-new-account" doc:id="7b2de6ac-d090-4715-ac66-b448097de711" >
+		<logger level="INFO" doc:name="Logger" doc:id="0fc593bd-b16d-4194-aea4-0ae3582bda41" />
+		<set-variable value="#[upper(payload.billingAddress.countryIso)]" doc:name="Set Variable to change the ISO to upper case" doc:id="8a98dfe1-2296-4a94-99e3-b311a35ed63c" variableName="iso"/>
+		<http:request method="${request-config.get-method}" doc:name="Request to get the country" doc:id="20eec684-41b0-4a6d-a725-a66155102af9" sendCorrelationId="ALWAYS" target="country" path="${request-config.get-path}" config-ref="HTTP_Request_configuration-country">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"correlationId" : "Good",
+	"client_secret" : "aAB82B8180B04E3391b503AA66844654",
+	"client_id" : "278c2c024ce94151884f31b544fb242b"
+}]]]></http:headers>
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"iso_code" : vars.iso
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="0ec39614-ba14-4d1a-9f20-05478921cb3b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "name": payload.name,
+  "email": payload.email,
+  "billingAddress": {
+    "city": payload.billingAddress.city,
+    "country": vars.country.Country,
+    "state": payload.billingAddress.state,
+    "street": payload.billingAddress.street,
+    "postalCode": payload.billingAddress.postalCode
+  },
+  "shippingAddress": {
+    "city": payload.shippingAddress.city,
+    "country": payload.shippingAddress.country,
+    "state": payload.shippingAddress.state,
+    "street": payload.shippingAddress.street,
+    "postalCode": payload.billingAddress.postalCode
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="${request-config.post-method}" doc:name="Request to sfdc-account post" doc:id="08227d3a-8e18-435a-b90e-fa84e53ba0bc" sendCorrelationId="ALWAYS" path="${request-config.post-path}" config-ref="HTTP_Request_configuration-sfdc">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"correlationId" : "Good",
+	"client_secret" : "aAB82B8180B04E3391b503AA66844654",
+	"client_id" : "278c2c024ce94151884f31b544fb242b"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message1" doc:id="99913dbd-ea13-406b-b7f8-4b80a2773f82" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

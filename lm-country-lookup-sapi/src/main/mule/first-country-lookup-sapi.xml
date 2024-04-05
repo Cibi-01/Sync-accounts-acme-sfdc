@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="first-country-lookup-sapi-main">
+        <http:listener path="${https.path}" config-ref="first-country-lookup-sapi-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="first-country-lookup-sapi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="first-country-lookup-sapi-console">
+        <http:listener path="/console/*" config-ref="first-country-lookup-sapi-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="first-country-lookup-sapi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="get:\countries:first-country-lookup-sapi-config">
+		<logger level="INFO" doc:name="Logger to verify the get flow" doc:id="72b72bc6-8aec-4ca8-8b88-859f6d5aced8" message="#[correlationId]"/>
+		<flow-ref doc:name="Flow Reference to get country" doc:id="7cc1f780-c750-4edf-b7ff-acf09be45525" name="flow-get-all-country"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+	<flow name="get:\countries\(iso_code):first-country-lookup-sapi-config">
+		<logger level="INFO" doc:name="Logger to verify the get flow" doc:id="d17ee480-7c4c-48c9-920e-eb9d01911f55" message="#[correlationId]"/>
+		<flow-ref doc:name="Flow Reference to get country through ISO" doc:id="2f6f6e00-73b8-4e46-ab3a-057a50a4cd21" name="flow-get-country"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+</mule>

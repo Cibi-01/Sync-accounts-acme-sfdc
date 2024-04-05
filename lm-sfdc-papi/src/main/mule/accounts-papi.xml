@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<flow name="accounts-papi-main">
+        <http:listener path="/api/*" config-ref="accounts-papi-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="accounts-papi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="accounts-papi-console">
+        <http:listener path="/console/*" config-ref="accounts-papi-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accounts-papi-config"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+    <flow name="put:\accounts\(account_id):application\json:accounts-papi-config">
+		<logger level="INFO" doc:name="Logger" doc:id="4a2dce95-4e2a-44a4-8523-1cbf2dbb46ef" />
+		<flow-ref doc:name="Flow Reference" doc:id="2807b0a7-514f-4431-a184-4dc24e3413f7" name="flow-update-account"/>
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+	<flow name="post:\accounts:application\json:accounts-papi-config">
+		<logger level="INFO" doc:name="Logger" doc:id="6ae7c36d-4dcc-45b5-b943-92a270a54689" />
+		<flow-ref doc:name="Flow Reference" doc:id="db9a4230-9845-4453-ad60-5cd298e309f3" name="flow-new-account" />
+		<error-handler ref="lm-common-error-handlerError_Handlers" />
+    </flow>
+</mule>

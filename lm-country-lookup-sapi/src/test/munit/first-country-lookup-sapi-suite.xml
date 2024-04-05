@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="first-country-lookup-sapi-suite.xml" />
+	<munit:test name="first-country-lookup-sapi-console-test" doc:id="84f9ba98-61b2-4c91-971d-e8d0a4ae6d41" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="d3df9175-5098-42e0-939c-7c162b4cad3c" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="first-country-lookup-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="122e36d2-df26-4b6c-ac5d-ec312d67fb52" processor="apikit:console">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="first-country-lookup-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="691775ee-672a-4261-87f7-a025778f6021" >
+				<munit:payload value="#[readUrl('classpath://firstcountrylookupsapiconsoletest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://firstcountrylookupsapiconsoletest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to first-country-lookup-sapi-console" doc:id="dfa5482a-e585-44d1-96e2-b08d076bdf66" name="first-country-lookup-sapi-console"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="1fb85d2f-b9fe-4fde-a1d3-49578cdbf42b" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import firstcountrylookupsapiconsoletest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="first-country-lookup-sapi-test-suite-first-country-lookup-sapi-mainTest" doc:id="3eebe366-280d-4e75-b536-71976f4b103c" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="bd3070dc-1495-4389-a144-310bea23d13c" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="first-country-lookup-sapi-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to first-country-lookup-sapi-main" doc:id="c9273b84-41c6-407b-a119-fddc59553634" name="first-country-lookup-sapi-main" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert doc:name="Assert expression" doc:id="935ad470-fe3b-4fc7-920b-0a7ad1479bd1" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="flow-get-all-country-test" doc:id="01b9bc59-55d7-408b-8491-f2d19ad5ad18" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="931e7285-466d-41e9-9627-309c9fa13f96" >
+				<munit:payload value="#[readUrl('classpath://flowgetallcountrytest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://flowgetallcountrytest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://flowgetallcountrytest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to flow-get-all-country" doc:id="b4229ba9-3b1e-452d-b644-b0038f5127a2" name="flow-get-all-country" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="5b5b0744-ddf3-437b-95e4-ea519f1fccc9" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import flowgetallcountrytest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="flow-get-country-test" doc:id="0c82e5be-687e-4abf-b078-6aee41a79c96" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="8547e034-d71a-463e-a11e-66c53053f93a" >
+				<munit:payload value="#[readUrl('classpath://flowgetcountrytest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://flowgetcountrytest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeadersMapName" value="#[readUrl('classpath://flowgetcountrytest\set-event_variable_.dwl')]" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to flow-get-country" doc:id="f0659f0d-5010-4c9c-a6bf-5cb4e61fd689" name="flow-get-country" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="d615e44e-a7d3-4573-8346-72986605fb67" message="The payload does not match" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import flowgetcountrytest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
